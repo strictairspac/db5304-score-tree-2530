@@ -12,3 +12,9 @@ class Status(StrEnum):
     RUNNING = 'running'
     COMPLETE = 'complete'
     FAILED = 'failed'
+
+
+class TourStatus(StrEnum):
+    MERGING = 'merging'
+    BLOCKED = 'blocked'
+    COMPLETE = 'complete'

@@ -111,13 +111,17 @@ class BPlusTree:
         self.splits.append(Split(score.number, '内部页', promoted, page.page_id, right.page_id))
         return promoted, right
 
-    def lookup(self, first: int, last: int) -> RangeResult:
+    def descend(self, key: int) -> tuple[LeafPage, list[int]]:
+        """Walk from the root to the leaf page that would hold key."""
         page = self.root
         descent = [page.page_id]
         while isinstance(page, InternalPage):
-            page = page.children[bisect_right(page.separators, first)]
+            page = page.children[bisect_right(page.separators, key)]
             descent.append(page.page_id)
+        return page, descent
 
+    def lookup(self, first: int, last: int) -> RangeResult:
+        page, descent = self.descend(first)
         result = RangeResult(descent, [], [])
         offset = bisect_left(page.entries, first, key=score_number)
         leaf: LeafPage | None = page

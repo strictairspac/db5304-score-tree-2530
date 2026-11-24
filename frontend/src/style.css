@@ -68,8 +68,12 @@ td { border-top:1px solid var(--line); min-width: 3.3rem; max-width: 35ch; }
 .metrics dd { margin: .25em 0 0; color: var(--accent-dark); font-weight: 750; font-size: clamp(1.2rem,2.75vw,2.4rem); line-height: 1.24; overflow-wrap: anywhere; }
 .metrics dt { font-weight: 600; font-size: .89em; }
 .status { display:inline-block; border:1px solid var(--line); padding:.05em .55em; border-radius:var(--radius); white-space:nowrap; font-size:.88em; }
-.status[data-state='complete'] { color: oklch(.35 .09 150); border-color: oklch(.78 .11 151); }
+.status[data-state='complete'],.status[data-state='done'] { color: oklch(.35 .09 150); border-color: oklch(.78 .11 151); }
+.status[data-state='merging'],.status[data-state='reading'] { color: oklch(.4 .1 250); border-color: oklch(.8 .07 250); }
+.status[data-state='blocked'],.status[data-state='down'] { color: oklch(.42 .12 70); border-color: oklch(.82 .1 75); background: oklch(.96 .04 82); }
 .status[data-state='failed'],.error { color: oklch(.36 .15 27); background: oklch(.94 .045 26); }
+.pager { display:flex; align-items:center; gap:1rem; margin-bottom:1rem; }
+.pager span { font-weight:650; white-space:nowrap; }
 .error { padding:.7rem .9rem; margin-bottom:1rem; border-inline-start:3px solid currentColor; }
 .empty { margin:0; padding:1.3rem; color:var(--muted); background:var(--soft); }
 summary { cursor:pointer; font-weight:600; color:var(--accent-dark); }

@@ -1,13 +1,14 @@
-# 榆弦谱库·曲谱目录页索引
+# 榆弦谱库·巡演借谱合单
 
-实现 B+ 树叶页和内部页分裂，沿叶页链查编号区间。面向演示数据和本地复现，场景、操作剧本和业务边界见 [BUSINESS.md](BUSINESS.md)。
+把几家分馆已巡检的目录批次合开一张巡演借谱单：沿各馆 B+ 树叶链按需扫描号段，按编号合并出页，同号库存相加；分馆断连时已查明的连续前段照常出页，中断后从检查点恢复，已出的页重试不增副本。面向演示数据和本地复现，场景、操作剧本和业务边界见 [BUSINESS.md](BUSINESS.md)。
 
 ## 业务模块
 
-- 曲目索引批
-- 页容量设置
-- 索引巡检
-- 范围借阅单
+- 分馆目录批
+- 合单设置
+- 合并执行
+- 巡演借阅单
+- 业务证据
 
 ## 本地运行
 
@@ -33,7 +34,7 @@ docker compose up -d --build --wait
 | `reviewer` | 复核员 | 读取、导出和签署结果 |
 | `viewer` | 观察员 | 读取、导出已有结果 |
 
-`SEED_DEMO=true` 启动时生成账号与一个业务样例。工作台新建档案会预填样例。可编辑表单中的数值、文本和结构化 JSON 后提交。业务说明中的原始文件是上游示例，演示数据通过表单录入。角色枚举位于后端 `src/constants/workflow.py` 与前端 `src/constants/workflow.js`。执行状态枚举也位于这两个文件，使用于队列、列表和执行详情。证据校验码是报告 JSON 按 UTF-8、键排序且省略多余空格序列化后的 SHA-256。
+`SEED_DEMO=true` 启动时生成账号与一个业务样例。工作台新建档案会预填样例。可编辑表单中的数值、文本和结构化 JSON 后提交。业务说明中的原始文件是上游示例，演示数据通过表单录入。角色枚举位于后端 `src/constants/workflow.py` 与前端 `src/constants/workflow.js`。执行状态与合单状态枚举也位于这两个文件，使用于队列、列表、执行详情和借阅单页。证据校验码是报告 JSON 按 UTF-8、键排序且省略多余空格序列化后的 SHA-256。
 
 ## 工程结构
 
@@ -45,7 +46,7 @@ docker compose up -d --build --wait
 | db | MySQL 8.0，持久卷保存档案、执行、证据及审计 |
 | redis | Redis 7，追加日志卷保存队列唤醒信号 |
 
-编辑 `backend/src/services/domain.py` 可修改试算方法与业务表单说明。API 路由、数据定义和页面位于 `backend/src/routes/`、`backend/src/models/` 与 `frontend/src/pages/`。开发时更新源文件后重新构建对应服务。
+编辑 `backend/src/services/touring.py` 可修改合单合并与出页方法，`backend/src/services/domain.py` 维护业务表单说明与演示样例。API 路由、数据定义和页面位于 `backend/src/routes/`、`backend/src/models/` 与 `frontend/src/pages/`。开发时更新源文件后重新构建对应服务。合单引擎的纯逻辑测试在 `backend/tests/`，本地运行 `python3 -m unittest discover -s tests`（在 `backend/` 目录下）。
 
 `.env.example` 提供 `FRONTEND_PORT`、`BACKEND_PORT`、`DB_PORT`、`DB_PASSWORD`、`AUTH_KEY` 、`SEED_DEMO` 与 `NETWORK_SUBNET`。修改 `NETWORK_SUBNET` 可避开本机现有容器网段。所有发布的端口绑定本机回环地址。接入独立部署前需配置自己的凭据并按业务范围做独立验收。
 

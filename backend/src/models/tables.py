@@ -1,5 +1,5 @@
 from sqlalchemy import (JSON, Column, ForeignKey, Integer, MetaData, String,
-                        Table, Text)
+                        Table, Text, UniqueConstraint)
 
 schema = MetaData()
 users = Table('accounts', schema,
@@ -38,3 +38,26 @@ audit = Table('audit_events', schema,
     Column('action', String(32), nullable=False),
     Column('reference', String(50), nullable=False),
     Column('created_at', String(32), nullable=False))
+tour_sessions = Table('tour_sessions', schema,
+    Column('id', Integer, primary_key=True),
+    Column('run_id', ForeignKey('business_runs.id'), nullable=False, unique=True),
+    Column('case_id', ForeignKey('business_cases.id'), nullable=False, index=True),
+    Column('status', String(20), nullable=False, index=True),
+    Column('page_size', Integer, nullable=False),
+    Column('range_start', Integer, nullable=False),
+    Column('range_end', Integer, nullable=False),
+    Column('frontier', Integer, nullable=False),
+    Column('emitted_pages', Integer, nullable=False),
+    Column('resolved_rows', Integer, nullable=False),
+    Column('state', JSON, nullable=False),
+    Column('created_at', String(32), nullable=False),
+    Column('updated_at', String(32), nullable=False))
+tour_pages = Table('tour_pages', schema,
+    Column('id', Integer, primary_key=True),
+    Column('session_id', ForeignKey('tour_sessions.id'), nullable=False, index=True),
+    Column('page_no', Integer, nullable=False),
+    Column('rows', JSON, nullable=False),
+    Column('first_number', Integer, nullable=False),
+    Column('last_number', Integer, nullable=False),
+    Column('created_at', String(32), nullable=False),
+    UniqueConstraint('session_id', 'page_no', name='uq_tour_page'))

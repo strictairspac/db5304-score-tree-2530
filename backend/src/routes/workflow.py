@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text
 
 from src.config.settings import cache, engine
 from src.controllers.workflow import download
 from src.models.tables import audit, cases, evidence, runs
 from src.schemas.workflow import CaseForm, LoginForm, ReviewForm
-from src.services import domain, workflow
+from src.services import domain, tour_store, workflow
 from src.services.security import current_user, login, operator, reviewer
 
 router = APIRouter()
@@ -47,6 +47,24 @@ def list_runs(_=Depends(current_user)):
 @router.post('/cases/{case_id}/runs', status_code=202)
 def start_run(case_id: int, actor=Depends(operator)):
     return workflow.enqueue(case_id, actor)
+
+
+@router.post('/runs/{run_id}/resume')
+def resume_run(run_id: int, actor=Depends(operator)):
+    return workflow.resume(run_id, actor)
+
+
+@router.get('/tours')
+def list_tours(_=Depends(current_user)):
+    return tour_store.list_sessions()
+
+
+@router.get('/tours/{session_id}/pages/{page_no}')
+def read_tour_page(session_id: int, page_no: int, _=Depends(current_user)):
+    page = tour_store.get_page(session_id, page_no)
+    if page is None:
+        raise HTTPException(404, '该页尚未出页，请稍后刷新')
+    return page
 
 
 @router.get('/evidence')
